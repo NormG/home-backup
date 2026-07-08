@@ -1,0 +1,29 @@
+# rsync exclude patterns for home-backup.
+# One pattern per line; paths are relative to your home directory.
+# Blank lines and lines starting with '#' are ignored.
+# See the "FILTER RULES" section of `man rsync` for syntax.
+
+# --- Caches (regenerable, no need to back up) ---
+.cache/
+.thumbnails/
+.var/app/*/cache/
+.mozilla/firefox/*/cache2/
+.config/google-chrome/*/Cache/
+.config/google-chrome/*/Code Cache/
+.config/chromium/*/Cache/
+.config/BraveSoftware/*/*/Cache/
+
+# --- Trash ---
+.local/share/Trash/
+.Trash-*/
+
+# --- Disc images ---
+*.iso
+
+# --- User "extras" directory ---
+.extras/
+
+# --- Misc ---
+lost+found/
+.gvfs/
+*~
