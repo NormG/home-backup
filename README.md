@@ -6,6 +6,9 @@ with desktop notifications and a one-click **Back Up Now** launcher.
 
 > Status: **v0.99** — pre-1.0, used and tested; feedback welcome.
 
+## Screenshot
+![Home Backup](docs/screenshot.png)
+
 ## Features
 - **Snapshot backups** via `rsync --link-dest`: every snapshot is a complete,
   browsable tree, but unchanged files are hard-linked so storage stays small.
