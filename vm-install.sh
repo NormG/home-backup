@@ -1,16 +1,14 @@
 #!/usr/bin/env bash
 #
 # vm-bootstrap.sh — The "Day Zero" installer for a new Fedora VM.
-# This script handles system-level configuration (fstab/automount)
-# and then hands off to the user-level installer.
+# Uses SSH for cloning to avoid interactive password prompts.
 #
 set -euo pipefail
 
 # --- Configuration ---
-REPO_URL="https://github.com/NormG/home-backup"
+# Using SSH URL to bypass HTTPS password prompts
+REPO_URL="git@github.com:NormG/home-backup.git"
 INSTALL_DIR="$HOME/Projects/home-backup"
-# The mount point you want for your backup drive (must match your hardware/intent)
-# We use /mnt/home_backups as it's a standard, clean location.
 AUTOMOUNT_TARGET="/mnt/home_backups"
 
 echo "--- 🛠️  Starting Home-Backup Bootstrap for Fedora ---"
@@ -19,25 +17,23 @@ echo "--- 🛠️  Starting Home-Backup Bootstrap for Fedora ---"
 echo "--- 📦 Installing system dependencies (zenity, rsync, findutils, etc.) ---"
 sudo dnf install -y git rsync findutils zenity util-linux
 
-# 2. Clone the Repository
+# 2. Clone the Repository (Shallow Clone for speed)
 if [ -d "$INSTALL_DIR" ]; then
     echo "--- 📂 Repository exists. Pulling latest changes... ---"
     cd "$INSTALL_DIR" && git pull
 else
-    echo "--- 📥 Cloning repository... ---"
-    git clone "$REPO_URL" "$INSTALL_DIR"
+    echo "--- 📥 Cloning repository via SSH (Shallow Clone) ---"
+    # If this fails, ensure your SSH keys are added to GitHub!
+    git clone --depth 1 "$REPO_URL" "$INSTALL_DIR"
     cd "$INSTALL_DIR"
 fi
 
-# 3. Configure the System-Level Automount (The fstab magic)
-# We use the existing setup-automount.sh logic but ensure it's applied correctly.
+# 3. Configure the System-Level Automount
 echo "--- ⚙️  Configuring Systemd Automount (fstab) ---"
-echo "This will allow your backup drive to mount automatically when accessed."
 echo "Target: $AUTOMOUNT_TARGET"
 
-# We run the script. Note: setup-automount.sh likely requires sudo for fstab.
-# We pass the target if the script supports it, otherwise we edit fstab manually.
-# Based on our analysis, we'll ensure the drive is ready for the user.
+# Ensure the mount point exists before running the automount setup
+sudo mkdir -p "$AUTOMOUNT_TARGET"
 sudo ./setup-automount.sh
 
 # 4. Hand-off to User-Level Installer
