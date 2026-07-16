@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 #
-# vm-bootstrap.sh — The "Day Zero" installer for a new Fedora VM.
-# Uses SSH for cloning to avoid interactive password prompts.
+# vm-install.sh — the "day zero" bootstrap for a new Fedora VM.
+# Installs dependencies, clones the repo over SSH (to avoid HTTPS password
+# prompts), configures the automount, and hands off to the per-user installer.
 #
 set -euo pipefail
 
@@ -31,6 +32,9 @@ fi
 # 3. Configure the System-Level Automount
 echo "--- ⚙️  Configuring Systemd Automount (fstab) ---"
 echo "Target: $AUTOMOUNT_TARGET"
+echo "NOTE: attach your backup drive now. On a fresh VM there is no config yet, so"
+echo "      setup-automount finds it by the ext4 label 'Storage' (or offers to"
+echo "      format a non-ext4 drive after you confirm)."
 
 # Ensure the mount point exists before running the automount setup
 sudo mkdir -p "$AUTOMOUNT_TARGET"
@@ -39,8 +43,8 @@ sudo ./setup-automount.sh
 # 4. Hand-off to User-Level Installer
 echo "--- 🚀 Handing off to the User-Level Installer ---"
 echo "--------------------------------------------------------"
-echo "IMPORTANT: The next step requires a GUI (Cinnamon Desktop)."
-echo "If you are in a terminal, please switch to your desktop session"
+echo "IMPORTANT: The next step needs a graphical desktop session (GNOME, Cinnamon, etc.)."
+echo "If you are in a plain terminal, switch to your desktop session"
 echo "and run: cd $INSTALL_DIR && ./install-home-backup.sh"
 echo "--------------------------------------------------------"
 

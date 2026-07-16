@@ -4,7 +4,7 @@ Simple, robust **rsync snapshot backups** of your home directory to an external
 ext4 drive — a full backup plus hard-linked incrementals, scheduled nightly,
 with desktop notifications and a one-click **Back Up Now** launcher.
 
-> Status: **v0.99** — pre-1.0, used and tested; feedback welcome.
+> Status: **pre-1.0** — used and tested; feedback welcome.
 
 ## Screenshot
 ![Home Backup](docs/screenshot.png)
@@ -29,6 +29,7 @@ with desktop notifications and a one-click **Back Up Now** launcher.
 - `setup-automount.sh` — root helper: optionally formats the drive ext4, sets
   ownership, adds the `/etc/fstab` systemd automount, and a Nautilus bookmark.
 - `backup-now.sh` — GUI wrapper behind the "Back Up Now" launcher.
+- `vm-install.sh` — one-shot bootstrap for a fresh Fedora VM (deps, SSH clone, setup + installer).
 - `home-backup.excludes` — default rsync exclude patterns (caches, `*.iso`, Trash…).
 - `home-backup.png` — launcher icon.
 
@@ -47,6 +48,18 @@ sudo ./setup-automount.sh
 ```
 The installer only prompts if it cannot determine the backup drive on its own.
 `setup-automount.sh` asks for explicit confirmation before formatting anything.
+
+### Fresh Fedora VM (one-shot bootstrap)
+On a new Fedora VM, `vm-install.sh` does it all in one pass — installs
+dependencies, clones the repo over SSH, runs `setup-automount.sh`, then the
+per-user installer:
+```bash
+./vm-install.sh
+```
+> **Before running:** attach the backup drive and make sure its ext4 partition
+> is **labelled `Storage`**. A fresh VM has no config yet, so `setup-automount.sh`
+> locates the drive by that label (it offers to format a non-ext4 drive after you
+> confirm). The SSH clone needs your GitHub SSH key set up.
 
 ## How it works
 - **Source**: your entire `$HOME`, minus the patterns in `home-backup.excludes`.
