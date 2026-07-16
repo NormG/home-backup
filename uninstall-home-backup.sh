@@ -7,7 +7,8 @@
 set -euo pipefail
 
 # --- Configuration ---
-INSTALL_DIR="$HOME/Projects/home-backup"
+# Auto-detect the source dir = the directory this script lives in.
+INSTALL_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 CONFIG_DIR="$HOME/.config/home-backup"
 STATE_DIR="$HOME/.local/state/home-backup"
 BIN_LINK="$HOME/.local/bin/home-backup.sh"
@@ -128,13 +129,18 @@ else
     log_action "SKIP" "No cron entry found."
 fi
 
-# Remove the Source Directory (The current directory)
-if [ "$INSTALL_DIR" != "/" ]; then
+# Remove the source directory (auto-detected as this script's own location).
+# SAFETY: only delete it if it genuinely looks like the home-backup source tree
+# (contains the engine + installer) and is never "/" or $HOME. This prevents a
+# stray copy of this script (e.g. in ~) from wiping the wrong directory.
+if [ -n "$INSTALL_DIR" ] && [ "$INSTALL_DIR" != "/" ] && [ "$INSTALL_DIR" != "$HOME" ] \
+   && [ -f "$INSTALL_DIR/home-backup.sh" ] && [ -f "$INSTALL_DIR/install-home-backup.sh" ]; then
     echo "--- 📂 Removing Source Code Directory ---"
-    # We use 'cd ..' to ensure we aren't trying to delete the directory we are standing in
-    cd ..
+    cd /    # step out so we're never standing inside the tree we delete
     rm -rf "$INSTALL_DIR"
     log_action "SUCCESS" "Removed source directory: $INSTALL_DIR"
+else
+    log_action "SKIP" "Source dir not removed: '$INSTALL_DIR' is not a home-backup source tree (or is / or \$HOME)."
 fi
 
 # 3. Final Report
