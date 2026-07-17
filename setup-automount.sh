@@ -49,7 +49,7 @@ if [[ -r "$CONFIG" ]]; then
         fi
     fi
 fi
-[[ -n "$DEVICE" ]] || DEVICE="$(blkid -L Storage 2>/dev/null || true)"
+[[ -n "$DEVICE" ]] || DEVICE="$(blkid -L Backup 2>/dev/null || true)"
 [[ -n "$DEVICE" && -b "$DEVICE" ]] || {
     echo "Could not find the backup partition. Plug the drive in and/or run the installer first." >&2
     exit 1
