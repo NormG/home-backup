@@ -121,9 +121,16 @@ else
     log_action "SKIP" "No Nautilus bookmark found."
 fi
 
-# Remove the nightly cron entry (idempotent, by marker).
+# Remove the nightly cron entry (idempotent, by marker). Guard against
+# set -o pipefail aborting the script when HOME-BACKUP is the ONLY entry
+# (grep -v then selects nothing and exits non-zero).
 if crontab -l 2>/dev/null | grep -qF "$CRON_MARKER"; then
-    ( crontab -l 2>/dev/null | grep -vF "$CRON_MARKER" ) | crontab -
+    remaining="$(crontab -l 2>/dev/null | grep -vF "$CRON_MARKER" || true)"
+    if [[ -n "$remaining" ]]; then
+        printf '%s\n' "$remaining" | crontab -
+    else
+        crontab -r 2>/dev/null || true   # no other jobs left
+    fi
     log_action "SUCCESS" "Removed cron entry."
 else
     log_action "SKIP" "No cron entry found."
