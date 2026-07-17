@@ -22,13 +22,21 @@ if [[ ! -x "$ENGINE" ]]; then
 fi
 
 if gui; then
-    # Pulsate while the engine runs; it auto-closes when the engine exits.
-    "$ENGINE" | zenity --progress --pulsate --auto-close --no-cancel \
+    # We run the engine in the background and let zenity pulsate.
+    # We redirect the engine's stdout/stderr to the log file so it doesn't clog the pipe.
+    "$ENGINE" >> "$LOG" 2>&1 &
+    ENGINE_PID=$!
+
+    zenity --progress --pulsate --auto-close --no-cancel \
         --title="Home Backup" --text="Backing up your home directory…" 2>/dev/null
-    rc=${PIPESTATUS[0]}
+
+    # Wait for the background engine to finish
+    wait $ENGINE_PID
+    rc=$?
+
     if [[ "$rc" -eq 0 ]]; then
         zenity --info --title="Home Backup" \
-            --text="Backup run finished.\n\nSee the notification for the result (complete / skipped)." 2>/dev/null || true
+            --text="Backup run finished.\n\nSee the notification for the result." 2>/dev/null || true
     else
         zenity --error --title="Home Backup" \
             --text="Backup reported a problem (exit $rc).\n\nLog: $LOG" 2>/dev/null || true

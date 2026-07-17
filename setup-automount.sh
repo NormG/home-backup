@@ -36,7 +36,7 @@ confirm_yes() {  # $1 = prompt; returns 0 only if the user types exactly YES
 }
 
 # --- Find the backup partition ------------------------------------------------
-# Prefer the config's UUID (unless it points at optical media), else 'Storage'.
+# Prefer the config's UUID (unless it points at optical media), else 'Backup'.
 DEVICE=""
 if [[ -r "$CONFIG" ]]; then
     # shellcheck disable=SC1090
