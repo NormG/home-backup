@@ -33,12 +33,24 @@ fi
 echo "--- ⚙️  Configuring Systemd Automount (fstab) ---"
 echo "Target: $AUTOMOUNT_TARGET"
 echo "NOTE: attach your backup drive now. On a fresh VM there is no config yet, so"
-echo "      setup-automount finds it by the ext4 label 'Storage' (or offers to"
+echo "      setup-automount finds it by the ext4 label 'Backup' (or offers to"
 echo "      format a non-ext4 drive after you confirm)."
 
 # Ensure the mount point exists before running the automount setup
 sudo mkdir -p "$AUTOMOUNT_TARGET"
 sudo ./setup-automount.sh
+
+# After setup-automount.sh finishes...
+echo "--- 🔍 Verifying mount readiness ---"
+if ! sudo bash "$INSTALL_DIR/chk_fr_mnt.sh"; then
+    echo "❌ Mount verification failed. Check drive connection or fstab entry." >&2
+    exit 1
+fi
+
+echo "--- 🚀 Handing off to User-Level Installer ---"
+# Drop back to user context (critical: installer must NOT run as root)
+sudo -u "$SUDO_USER" bash "$INSTALL_DIR/install-home-backup.sh"
+
 
 # 4. Hand-off to User-Level Installer
 echo "--- 🚀 Handing off to the User-Level Installer ---"

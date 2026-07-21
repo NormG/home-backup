@@ -16,6 +16,7 @@ set -euo pipefail
 MOUNTPOINT="/mnt/home_backups"
 SUBDIR=""                                   # empty: snapshots live at the mountpoint
 BACKUP_DIR="$MOUNTPOINT${SUBDIR:+/$SUBDIR}"
+DRIVE_LABEL="Backup" 
 FSTAB="/etc/fstab"
 MARKER="# home-backup-automount"
 
